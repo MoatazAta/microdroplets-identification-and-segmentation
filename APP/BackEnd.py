@@ -191,15 +191,19 @@ def crop2(images_path, height, width):
         elif imgwidth % width != 0:
             img = cv2.resize(img, (imgheight, imgwidth - (imgwidth % width)))
 
-        for i in range(0, imgheight - BATCH_HIGHT, height):
-            for j in range(0, imgwidth - BATCH_WIDTH, width):
+        imgwidth, imgheight = img.shape
+        indexheight = imgheight
+        indexwidth = imgwidth
+        for i in range(0, indexheight, height):
+            for j in range(0, indexwidth, width):
                 patch = img[j:j + width, i:i + height]
                 if len(patch.shape) == 3:
                     patch = patch[:, :, :3]
                 patch = np.expand_dims(patch, axis=-1)
-
                 images.append(patch)
-
+                indexwidth = indexwidth - BATCH_WIDTH
+            indexwidth = imgwidth
+            indexheight = indexheight - BATCH_HIGHT
     return np.asarray(images)
 
 
@@ -772,7 +776,10 @@ class MainWindow(QMainWindow):
         self.update_train_msk_lcds(0)
 
     def start_training(self):
-        if self.ui.train_model_name_txtbox.text() and self.ui.train_epoch_number_txtbox.text():
+        if num_train_selected_images != num_train_selected_masks:
+            self.ui.train_prog_lbl.setStyleSheet(u"color: lightred;\n" "font: 75 11pt \"Aharoni\";")
+            self.ui.train_prog_lbl.setText("number of selcted images must be equal to selected masks")
+        elif self.ui.train_model_name_txtbox.text() and self.ui.train_epoch_number_txtbox.text():
             self.ui.train_prog_lbl.setText("Training Started")
             model_name = self.ui.train_model_name_txtbox.text()
             num_epochs = int(self.ui.train_epoch_number_txtbox.text())
@@ -1203,8 +1210,8 @@ class WorkerThread(QtCore.QThread):
             segmintated = np.zeros((imgheight, imgwidth), dtype=np.uint8)
             indexheight = imgheight
             indexwidth = imgwidth
-            for i in tqdm(range(0, indexheight , BATCH_HIGHT)):
-                for j in tqdm(range(0, indexwidth , BATCH_WIDTH)):
+            for i in tqdm(range(0, indexheight, BATCH_HIGHT)):
+                for j in tqdm(range(0, indexwidth, BATCH_WIDTH)):
                     info = "Image Name: " + key + " " + str(counter) + " OF " + str(number_of_patches)
                     self.progbar_lbl_update.emit(info)
                     counter += 1
