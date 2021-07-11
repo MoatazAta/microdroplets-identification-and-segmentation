@@ -54,6 +54,7 @@ from ui_main import Ui_MainWindow, QPixmap
 from ui_show_images import Ui_Segmented_images
 # IMPORT FUNCTIONS
 from ui_functions import *
+from skimage.util.shape import view_as_windows
 
 # Global paramenters
 # images/masks dic: key = image/mask file name
@@ -170,42 +171,84 @@ def preprocessImage():
     return imgInPatches, mskInPatches
 
 
+# def crop2(images_path, height, width):
+#     """
+#     this function split the original to mutiple patches with sahpe (height,width)
+#     :param images_path: the path of original image
+#     :param height: height of patch
+#     :param width:  width of patch
+#     :return: list of patches of original image.
+#     """
+#
+#     images = []
+#     for imgpath in tqdm(images_path):
+#
+#         img = cv2.imread(imgpath, 0) / 255
+#         imgwidth, imgheight = img.shape
+#         if imgwidth % width != 0 and imgheight % height != 0:
+#             img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth - (imgwidth % width)))
+#         elif imgheight % height != 0:
+#             img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth))
+#         elif imgwidth % width != 0:
+#             img = cv2.resize(img, (imgheight, imgwidth - (imgwidth % width)))
+#
+#         imgwidth, imgheight = img.shape
+#         indexheight = imgheight
+#         indexwidth = imgwidth
+#         for i in range(0, indexheight, height):
+#             for j in range(0, indexwidth, width):
+#                 patch = img[j:j + width, i:i + height]
+#                 if len(patch.shape) == 3:
+#                     patch = patch[:, :, :3]
+#                 patch = np.expand_dims(patch, axis=-1)
+#                 images.append(patch)
+#                 indexwidth = indexwidth - BATCH_WIDTH
+#             indexwidth = imgwidth
+#             indexheight = indexheight - BATCH_HIGHT
+#     return np.asarray(images)
+
+
 def crop2(images_path, height, width):
     """
-    this function split the original to mutiple patches with sahpe (height,width)
-    :param images_path: the path of original image
-    :param height: height of patch
-    :param width:  width of patch
-    :return: list of patches of original image.
+Makes patches from a given 2D image where each patch is size of d_sizeXd_size and each patch is far 1*stride away.
+    :param image: a 2d numpy array.
+    :param d_size: the size of the width and height of the patch.
+    :param stride: how many pixels to stride from patch to another.
+    :return: a 3d numpy array that contains all the patches.
     """
-
-    images = []
+    stride = 128
+    d_size = BATCH_WIDTH
+    patches = []
     for imgpath in tqdm(images_path):
-
-        img = cv2.imread(imgpath, 0) / 255
-        imgwidth, imgheight = img.shape
-        if imgwidth % width != 0 and imgheight % height != 0:
-            img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth - (imgwidth % width)))
-        elif imgheight % height != 0:
-            img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth))
-        elif imgwidth % width != 0:
-            img = cv2.resize(img, (imgheight, imgwidth - (imgwidth % width)))
-
-        imgwidth, imgheight = img.shape
-        indexheight = imgheight
-        indexwidth = imgwidth
-        for i in range(0, indexheight, height):
-            for j in range(0, indexwidth, width):
-                patch = img[j:j + width, i:i + height]
-                if len(patch.shape) == 3:
-                    patch = patch[:, :, :3]
-                patch = np.expand_dims(patch, axis=-1)
-                images.append(patch)
-                indexwidth = indexwidth - BATCH_WIDTH
-            indexwidth = imgwidth
-            indexheight = indexheight - BATCH_HIGHT
-    return np.asarray(images)
-
+        image = cv2.imread(imgpath, 0) / 255
+        original_height, original_width = image.shape  # taking the original height and size
+        # because each patch is size of desired size then we have a limit to how many times we can stride until we reach the
+        # image border, so we calculate that border and use it as condition for when to stop patch making.
+        h_border = original_height - d_size - 1
+        w_border = original_width - d_size - 1
+        i = 0
+        j = 0
+        last_patch_height = True
+        last_patch_width = True
+        ### patch making for training
+        while i <= h_border:
+            while j <= w_border:
+                patches.append(image[i:i + d_size, j:j + d_size])
+                j += stride
+                if j > w_border and last_patch_width:
+                    j = w_border
+                    last_patch_width = False
+            i += stride
+            j = 0
+            last_patch_width = True
+            if i > h_border and last_patch_height:
+                i = h_border
+                last_patch_height = False
+    print("---------TEST----------")
+    patches = np.asarray(patches)
+    print(patches.shape)
+    print(len(patches))
+    return patches
 
 def uNet():
     """
