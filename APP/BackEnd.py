@@ -1326,7 +1326,8 @@ class WorkerThread(QtCore.QThread):
         print("---------------------------Start Training--------------------------------")
         # Update batch size
         update_batch_size(self.image_batch_size)
-
+        if stop_training_flag:
+            stop_training_flag = False
         images, maskes = preprocessImage()
         x_train, x_test, y_train, y_test = train_test_split(images, maskes, test_size=0.2)
 
@@ -1334,13 +1335,12 @@ class WorkerThread(QtCore.QThread):
         # simple early stopping
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50)
         # fit model
+
         results = model.fit(x_train, y_train, epochs=self.num_epochs, batch_size=self.batch_size
                             , validation_split=0.1, verbose=1, callbacks=[es, CustomCallback()])
 
         # To stop the process of training if the stop button is pressed
-        if stop_training_flag:
-            stop_training_flag = False
-        else:
+        if not stop_training_flag:
             # evaluate
             score, accuracy = model.evaluate(x_test, y_test, batch_size=self.batch_size)
             # the results
@@ -1354,7 +1354,7 @@ class WorkerThread(QtCore.QThread):
                 model.save('Models/256/' + self.model + ".h5")
             else:
                 model.save('Models/512/' + self.model + ".h5")
-        self.train_complete.emit(str(accuracy * 100), self.model)
+            self.train_complete.emit(str(accuracy * 100), self.model)
         training = False
 
     def run_loader(self):
