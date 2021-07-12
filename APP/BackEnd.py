@@ -79,6 +79,7 @@ BATCH_HIGHT = 512
 
 stop_training_flag = False
 training = True
+overlap = False
 
 
 # Help functions
@@ -157,7 +158,13 @@ def preprocessImage():
     for key in images_train_dic:
         listOfImages.append(images_train_dic[key])
     listOfImages.sort()
-    imgInPatches = crop2(listOfImages, BATCH_HIGHT, BATCH_WIDTH)
+    if overlap:
+        print("Overlapcrop")
+        imgInPatches = overlapCrop(listOfImages, BATCH_HIGHT, BATCH_WIDTH)
+    else:
+        print("crop")
+        imgInPatches = crop(listOfImages, BATCH_HIGHT, BATCH_WIDTH)
+
     del listOfImages
     print("Finished Preprocessing images")
     print("Starting Preprocessing Mask")
@@ -165,50 +172,54 @@ def preprocessImage():
     for key in masks_train_dic:
         listOfMasks.append(masks_train_dic[key])
     listOfMasks.sort()
-    mskInPatches = crop2(listOfMasks, BATCH_HIGHT, BATCH_WIDTH)
+    if overlap:
+        mskInPatches = overlapCrop(listOfMasks, BATCH_HIGHT, BATCH_WIDTH)
+    else:
+        mskInPatches = crop(listOfMasks, BATCH_HIGHT, BATCH_WIDTH)
+
     del listOfMasks
     print("Finished Preprocessing Mask")
     return imgInPatches, mskInPatches
 
 
-# def crop2(images_path, height, width):
-#     """
-#     this function split the original to mutiple patches with sahpe (height,width)
-#     :param images_path: the path of original image
-#     :param height: height of patch
-#     :param width:  width of patch
-#     :return: list of patches of original image.
-#     """
-#
-#     images = []
-#     for imgpath in tqdm(images_path):
-#
-#         img = cv2.imread(imgpath, 0) / 255
-#         imgwidth, imgheight = img.shape
-#         if imgwidth % width != 0 and imgheight % height != 0:
-#             img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth - (imgwidth % width)))
-#         elif imgheight % height != 0:
-#             img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth))
-#         elif imgwidth % width != 0:
-#             img = cv2.resize(img, (imgheight, imgwidth - (imgwidth % width)))
-#
-#         imgwidth, imgheight = img.shape
-#         indexheight = imgheight
-#         indexwidth = imgwidth
-#         for i in range(0, indexheight, height):
-#             for j in range(0, indexwidth, width):
-#                 patch = img[j:j + width, i:i + height]
-#                 if len(patch.shape) == 3:
-#                     patch = patch[:, :, :3]
-#                 patch = np.expand_dims(patch, axis=-1)
-#                 images.append(patch)
-#                 indexwidth = indexwidth - BATCH_WIDTH
-#             indexwidth = imgwidth
-#             indexheight = indexheight - BATCH_HIGHT
-#     return np.asarray(images)
+def crop(images_path, height, width):
+    """
+    this function split the original to mutiple patches with sahpe (height,width)
+    :param images_path: the path of original image
+    :param height: height of patch
+    :param width:  width of patch
+    :return: list of patches of original image.
+    """
+
+    images = []
+    for imgpath in tqdm(images_path):
+
+        img = cv2.imread(imgpath, 0) / 255
+        imgwidth, imgheight = img.shape
+        if imgwidth % width != 0 and imgheight % height != 0:
+            img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth - (imgwidth % width)))
+        elif imgheight % height != 0:
+            img = cv2.resize(img, (imgheight - (imgheight % height), imgwidth))
+        elif imgwidth % width != 0:
+            img = cv2.resize(img, (imgheight, imgwidth - (imgwidth % width)))
+
+        imgwidth, imgheight = img.shape
+        indexheight = imgheight
+        indexwidth = imgwidth
+        for i in range(0, indexheight, height):
+            for j in range(0, indexwidth, width):
+                patch = img[j:j + width, i:i + height]
+                if len(patch.shape) == 3:
+                    patch = patch[:, :, :3]
+                patch = np.expand_dims(patch, axis=-1)
+                images.append(patch)
+                indexwidth = indexwidth - BATCH_WIDTH
+            indexwidth = imgwidth
+            indexheight = indexheight - BATCH_HIGHT
+    return np.asarray(images)
 
 
-def crop2(images_path, height, width):
+def overlapCrop(images_path, height, width):
     """
 Makes patches from a given 2D image where each patch is size of d_sizeXd_size and each patch is far 1*stride away.
     :param image: a 2d numpy array.
@@ -402,6 +413,8 @@ class MainWindow(QMainWindow):
 
         # Training Insert Masks
         self.ui.train_browse_masks_btn.clicked.connect(self.insert_train_masks)
+
+        self.ui.training_overlap_checkbox.stateChanged.connect(self.update_overlap)
 
         # Selecting and deleting images from training list
         self.ui.train_image_selectall_btn.clicked.connect(self.train_selectall_images_lstwdg)
@@ -817,6 +830,19 @@ class MainWindow(QMainWindow):
         del masks_train_dic
         masks_train_dic = {}
         self.update_train_msk_lcds(0)
+
+    def update_overlap(self):
+        """
+        This function reacts when the Overlap QCheckBox state changed.
+        :return:
+        """
+        global overlap
+        if self.ui.training_overlap_checkbox.isChecked():
+            overlap = True
+        else:
+            overlap = False
+
+
 
     def start_training(self):
         if num_train_selected_images != num_train_selected_masks:

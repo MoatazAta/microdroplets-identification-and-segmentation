@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'uiTpNXDJ.ui'
+## Form generated from reading UI file 'uisoospQ.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -11,7 +11,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui
 
 
 class Ui_MainWindow(object):
@@ -19,7 +18,6 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1326, 824)
-        MainWindow.setWindowIcon(QtGui.QIcon(u'icons/24x24/app_icon3_1'))
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -1153,6 +1151,22 @@ class Ui_MainWindow(object):
 
         self.train_pram_layout.setWidget(6, QFormLayout.FieldRole, self.train_imagesize_combox)
 
+        self.verticalSpacer_23 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.train_pram_layout.setItem(7, QFormLayout.FieldRole, self.verticalSpacer_23)
+
+        self.train_imagesize_lbl_2 = QLabel(self.formLayoutWidget)
+        self.train_imagesize_lbl_2.setObjectName(u"train_imagesize_lbl_2")
+        self.train_imagesize_lbl_2.setStyleSheet(u"color: rgb(255, 255, 255);\n"
+"font: 75 11pt \"Aharoni\";")
+
+        self.train_pram_layout.setWidget(8, QFormLayout.LabelRole, self.train_imagesize_lbl_2)
+
+        self.training_overlap_checkbox = QCheckBox(self.formLayoutWidget)
+        self.training_overlap_checkbox.setObjectName(u"training_overlap_checkbox")
+
+        self.train_pram_layout.setWidget(8, QFormLayout.FieldRole, self.training_overlap_checkbox)
+
         self.train_mask_lstwdg = QListWidget(self.train_frame)
         self.train_mask_lstwdg.setObjectName(u"train_mask_lstwdg")
         self.train_mask_lstwdg.setGeometry(QRect(800, 30, 341, 221))
@@ -1447,7 +1461,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1507,6 +1521,8 @@ class Ui_MainWindow(object):
         self.train_imagesize_combox.setItemText(0, QCoreApplication.translate("MainWindow", u"256", None))
         self.train_imagesize_combox.setItemText(1, QCoreApplication.translate("MainWindow", u"512", None))
 
+        self.train_imagesize_lbl_2.setText(QCoreApplication.translate("MainWindow", u"Overlap :", None))
+        self.training_overlap_checkbox.setText("")
         self.train_selected_images_lbl_2.setText(QCoreApplication.translate("MainWindow", u"SELECTED MASKS", None))
         self.train_unselected_images_lbl_2.setText(QCoreApplication.translate("MainWindow", u"UNSELECTED MASKS", None))
         self.train_selectall_masks_btn.setText(QCoreApplication.translate("MainWindow", u"  Select All", None))
