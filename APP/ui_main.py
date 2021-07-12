@@ -11,6 +11,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5 import QtGui
 
 
 class Ui_MainWindow(object):
@@ -26,6 +27,8 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(1300, 500))
         MainWindow.setMaximumSize(QSize(1500, 1500))
         MainWindow.setStyleSheet(u"background-color: rgb(45, 45, 45);")
+        MainWindow.setWindowIcon(QtGui.QIcon(u'icons/24x24/app_icon3_1'))
+
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)

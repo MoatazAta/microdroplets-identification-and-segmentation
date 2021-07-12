@@ -9,7 +9,7 @@
 ## ==> GUI FILE
 from PyQt5.QtCore import QPropertyAnimation
 
-from BackEnd import *
+from MicroSegmentation import *
 
 class UIFunctions(MainWindow):
 

@@ -19,7 +19,7 @@ class Ui_Segmented_images(object):
         if not Segmented_images.objectName():
             Segmented_images.setObjectName(u"Segmented_images")
         Segmented_images.resize(1084, 864)
-        self.setWindowIcon(QtGui.QIcon(u'icons/24x24/app_icon3_1'))
+        Segmented_images.setWindowIcon(QtGui.QIcon(u'icons/24x24/app_icon3_1'))
 
         self.centralwidget = QWidget(Segmented_images)
         self.centralwidget.setObjectName(u"centralwidget")
@@ -111,7 +111,7 @@ class Ui_Segmented_images(object):
     # setupUi
 
     def retranslateUi(self, Segmented_images):
-        Segmented_images.setWindowTitle(QCoreApplication.translate("Segmented_images", u"MainWindow", None))
+        Segmented_images.setWindowTitle(QCoreApplication.translate("Segmented_images", u"Show Results", None))
         self.image_lbl.setText("")
         self.showimage_previous_btn.setText(QCoreApplication.translate("Segmented_images", u" Previous", None))
         self.showimage_next_btn.setText(QCoreApplication.translate("Segmented_images", u" Next", None))
